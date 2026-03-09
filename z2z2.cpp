@@ -1,17 +1,15 @@
 #include<iostream>
-
 using namespace std;
-
 int main(){
-    int n,tab;
-    cout<<"podaj liczbę dla tablicznki mnozenia: ";
-    cin>>n;
-    for(int i=1;i<=n;i++){
-        for(int j=1;j<=n;j++){
-        tab=j*i;
-        cout<<tab<<" ";
+    float p,q,wynik;
+    while(true){
+        cout<<"podaj licznik p = ";cin>>p;
+        cout<<"podaj mianownik q = ";cin>>q;
+        if(q==0) break;
+        else{
+            wynik=p/q;
+            cout<<wynik<<endl;
+            continue;
         }
-    cout<<endl;
-
     }
 }
