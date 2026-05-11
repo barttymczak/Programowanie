@@ -5,9 +5,9 @@
 using namespace std;
 
 int losuj(int a, int b){
-    srand(time(NULL));
     //srand - inicjalizacja generowania 
     //time(null) - czas procesora
+    srand(time(NULL));
     return  rand() % b + a;
 }
 

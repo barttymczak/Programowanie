@@ -1,5 +1,9 @@
 #include<iostream>
+
 using namespace std;
+
+
+
 int main(){
     int n,tab;
     cout<<"podaj liczbę dla tablicznki mnozenia: ";
@@ -10,5 +14,6 @@ int main(){
         cout<<tab<<" ";
         }
     cout<<endl;
+
     }
 }

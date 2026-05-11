@@ -3,9 +3,9 @@
 #include <iomanip>
 #include <cmath>
 using namespace std;
-double losuj(int a, int b){
+double losuj(double a, double b){
     srand(time(NULL));
-    return  (double)rand() % a + b;
+    return  (double)rand() / a - b;
 }
 double znak(){
     srand(time(NULL));
