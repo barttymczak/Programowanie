@@ -4,7 +4,6 @@
 #include <vector>
 #include "Karta.h"
 
-// Klasa reprezentująca pojedynczy rząd na stole
 class Rzad {
 private:
     std::vector<Karta> kartyWRzedzie;
@@ -15,32 +14,30 @@ public:
     bool czyMoznaDodac(const Karta& karta) const;
     void dodajKarte(const Karta& karta);
     void wyswietlRzad() const;
+    int pobierzLiczbeKart() const;
 };
 
-// Klasa zarządzająca całą grą "The Bogey"
 class GraBogey {
 private:
     std::vector<Karta> taliaGlowna;
     std::vector<Karta> taliaOdrzuconych;
-    std::vector<Rzad> stoly; // Wszystkie aktywne rzędy na stole
+    std::vector<Rzad> stoly;
 
 public:
     GraBogey();
     void generujTasujTalie();
+    void przetasujOdrzucone();
     
-    // Faza Gracza
-    std::vector<Karta> dobierzKarty(int ilosc = 5);
+    std::vector<Karta> dobierzKarty(int ilosc);
+    Karta dociagnijJednaKarte(); // Dla Bogeymana
+    
     bool zagrajKarte(const Karta& karta, int numerRzedu);
     void stworzNowyRzad(const Karta& karta);
-    void odrzucKarte(const Karta& karta);
+    void odrzucKarty(const std::vector<Karta>& karty);
     
-    // Faza Bogeymana
-    void ruchBogeymana(); 
-    
-    // Funkcje pomocnicze
-    void przetasujOdrzucone();
     void wyswietlStanGry() const;
-    bool czyKoniecGry() const;
+    int zliczKartyNaStole() const;
+    int getLiczbaRzedow() const;
 };
 
 #endif
