@@ -1,0 +1,40 @@
+Plan działania: Co po kolei należy zrobić, aby w pełni zrealizować ten program?
+Oto lista kroków (roadmapa) do przekształcenia powyższego szablonu w działającą grę:
+
+Etap 1: Przygotowanie danych (Talia i Karty)
+
+Wypełnienie talii: Zaimplementuj funkcję generujTasujTalie(). Użyj dwóch pętli (dla 4 kolorów i 13 wartości od 2 do 14).
+
+Tasowanie: Użyj biblioteki <random> oraz funkcji std::shuffle, aby poprawnie wymieszać nowo utworzoną talię wektora.
+
+Etap 2: Mechanika Rzędu (Walidacja ruchów)
+
+Blokady rzędów: W metodzie czyMoznaDodac() dodaj warunki matematyczne. Sprawdź, czy karta.getKolor() == kolorRzedu. Następnie sprawdź, czy karta.getWartosc() < ostatniaKartaWRzedzie.getWartosc(). Jeśli nie, zwróć false.
+
+Etap 3: Zarządzanie Talią i stosem kart odrzuconych
+
+Dobieranie (Faza gracza): Napisz system usuwania elementu ze szczytu (lub końca) wektora talii głównej i przenoszenia ich do wirtualnej "ręki" gracza.
+
+Zrzutka: Karty, których gracz nie umieścił na stole z ręki (bo nie pasowały albo gracz tak zdecydował), przenieś do wektora taliaOdrzuconych.
+
+Przetasowanie odrzuconych: Jeśli podczas dociągania zabraknie kart, wektor taliaOdrzuconych nadpisuje taliaGlowna, zostaje przetasowany i taliaOdrzuconych jest zerowana.
+
+Etap 4: Menu Konsolowe (UI dla gracza)
+
+Wyświetlanie kart w ręce: W pętli main wypisz karty, które wylosował gracz i nadaj im indeksy [1], [2], [3], [4], [5].
+
+Podejmowanie decyzji: Użyj std::cin, pozwalając graczowi wybrać, którą kartę chce wrzucić i do którego rzędu (np. komenda "Zagraj kartę 1 do rzędu 2" albo "Zrób z karty 3 nowy rząd").
+
+Koniec tury: Dodaj mechanizm kończący turę gracza i odrzucający resztę ręki na stos odrzuconych.
+
+Etap 5: Implementacja "Bogeymana"
+
+Automatyczny dociąg: Na koniec każdej tury gracza, program automatycznie ciągnie jedną kartę z wierzchu talii.
+
+Decyzja o przymusie: System musi wyświetlić tę kartę graczowi i nakazać: "Bogeyman narzuca ci kartę X. Gdzie ją położysz?". Jeśli nie ma prawidłowego miejsca (bo rzędy mają inne kolory lub mniejsze wartości), system musi wymusić polecenie stworzNowyRzad().
+
+Etap 6: Warunek końca gry i System Punktacji
+
+Zakończenie: Gra kończy się, gdy wszystkie karty z talii (również po wielokrotnym przetasowywaniu odrzuconych) znajdą się ostatecznie wektorze rzędów (stoly).
+
+Punktacja: Wynikiem gracza jest stoly.size(). Celem optymalizacji kodu, program wyświetli ten rozmiar z komentarzem podsumowującym grę. Im mniejsza liczba tym lepszy wynik gracza.
