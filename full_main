@@ -1,0 +1,199 @@
+W pliku Talia.cpp dopisać:
+
+int Talia::pobierzLiczbeKart() const {
+    return taliaKart.size();
+}
+
+-----------------------
+
+ i dodać do Talia.h (jeśli nie ma):
+ 
+ int pobierzLiczbeKart() const;
+
+-------------
+
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
+
+#include "Talia.h"
+#include "Karta.h"
+
+using namespace std;
+
+int main() {
+    // Inicjalizacja ziarna losowosci
+    srand(time(NULL));
+
+    cout << "========================================" << endl;
+    cout << "            THE BOGEY - GRA             " << endl;
+    cout << "========================================" << endl;
+    cout << "Zasady: Uloz wszystkie karty w jak najmniejszej liczbie rzedow." << endl;
+    cout << "Karty w rzedzie musza byc tego samego koloru i malejace." << endl;
+
+    // 1. Inicjalizacja gry
+    Talia taliaGlowna(52, true); // Tworzy standardową talię 52 kart
+    taliaGlowna.tasuj();
+
+    Talia taliaOdrzuconych;      // Pusta talia na karty odrzucone z reki
+    vector<Talia> rzedy;         // Rzedy to w rzeczywistości małe "talie" kart na stole
+    vector<Karta> reka;          // Reka gracza (wektor do swobodnego usuwania kart)
+
+    bool graTrwa = true;
+
+    // Glowna petla gry
+    while (graTrwa) {
+        // --- FAZA 1: DOCIAGANIE KART ---
+        while (reka.size() < 5) {
+            // Jesli glowna talia jest pusta, przetasuj odrzucone
+            if (taliaGlowna.pobierzLiczbeKart() == 0) {
+                if (taliaOdrzuconych.pobierzLiczbeKart() == 0) break; // Brak kart gdziekolwiek
+                
+                cout << "\n[INFO] Talia glowna pusta. Tasuje stos odrzuconych..." << endl;
+                while (taliaOdrzuconych.pobierzLiczbeKart() > 0) {
+                    taliaGlowna.polozNaWierzch(taliaOdrzuconych.dobierzZWierzchu());
+                }
+                taliaGlowna.tasuj();
+            }
+            
+            // Dobieranie do reki
+            if (taliaGlowna.pobierzLiczbeKart() > 0) {
+                reka.push_back(taliaGlowna.dobierzZWierzchu());
+            }
+        }
+
+        // --- SPRAWDZENIE WARUNKU WYGRANEJ ---
+        int zagraneKarty = 0;
+        for (size_t i = 0; i < rzedy.size(); i++) {
+            zagraneKarty += rzedy[i].pobierzLiczbeKart();
+        }
+        if (zagraneKarty == 52) {
+            cout << "\n========================================" << endl;
+            cout << "              GRATULACJE!               " << endl;
+            cout << "   Rozlozono pomyslnie wszystkie karty! " << endl;
+            cout << "   Twoj wynik (liczba rzedow): " << rzedy.size() << endl;
+            cout << "========================================" << endl;
+            break;
+        }
+
+        // --- FAZA 2: RUCH GRACZA ---
+        bool turaGracza = true;
+        while (turaGracza && !reka.empty()) {
+            // Rysowanie stołu
+            cout << "\n---------- STOL (Rzedy: " << rzedy.size() << ") ----------" << endl;
+            for (size_t i = 0; i < rzedy.size(); i++) {
+                cout << "Rzad " << i + 1 << ": ";
+                for(int j = 0; j < rzedy[i].pobierzLiczbeKart(); j++) {
+                    cout << "[" << rzedy[i].pobierzKarte(j).nazwaKarty() << "] ";
+                }
+                cout << endl;
+            }
+            if (rzedy.empty()) cout << "(brak rzedow na stole)" << endl;
+
+            // Rysowanie reki
+            cout << "\n---------- TWOJA REKA ----------" << endl;
+            for (size_t i = 0; i < reka.size(); i++) {
+                cout << i + 1 << ". " << reka[i].nazwaKarty() << endl;
+            }
+            cout << "0. Zakoncz swoja ture (nieuzyte karty trafia na stos odrzuconych)" << endl;
+
+            int wybor;
+            cout << "\nWybierz akcje (0-" << reka.size() << "): ";
+            if (!(cin >> wybor)) {
+                cin.clear(); cin.ignore(10000, '\n'); continue; // Zabezpieczenie przed wpisaniem liter
+            }
+
+            if (wybor == 0) {
+                // Gracz konczy ture, karty trafiaja do odrzuconych
+                for (size_t i = 0; i < reka.size(); i++) {
+                    taliaOdrzuconych.polozNaWierzch(reka[i]);
+                }
+                reka.clear();
+                turaGracza = false;
+            } else if (wybor > 0 && wybor <= (int)reka.size()) {
+                // Gracz probuje zagrac karte
+                Karta wybranaKarta = reka[wybor - 1];
+                cout << "Gdzie polozysz [" << wybranaKarta.nazwaKarty() << "]?" << endl;
+                cout << "Podaj numer rzedu (1-" << rzedy.size() << ") lub otworz nowy wpisujac " << rzedy.size() + 1 << ": ";
+                
+                int wyborRzedu;
+                if (!(cin >> wyborRzedu)) { cin.clear(); cin.ignore(10000, '\n'); continue; }
+
+                if (wyborRzedu == (int)rzedy.size() + 1) {
+                    // Tworzenie nowego rzedu
+                    Talia nowyRzad;
+                    nowyRzad.polozNaWierzch(wybranaKarta);
+                    rzedy.push_back(nowyRzad);
+                    reka.erase(reka.begin() + wybor - 1);
+                } else if (wyborRzedu > 0 && wyborRzedu <= (int)rzedy.size()) {
+                    // Dokladanie do instniejacego rzedu
+                    int rIdx = wyborRzedu - 1;
+                    Karta topKarta = rzedy[rIdx].pobierzKarte(rzedy[rIdx].pobierzLiczbeKart() - 1);
+                    
+                    // Walidacja: ten sam kolor i wartosc mniejsza
+                    if (wybranaKarta.getKolor() == topKarta.getKolor() && wybranaKarta.getWartosc() < topKarta.getWartosc()) {
+                        rzedy[rIdx].polozNaWierzch(wybranaKarta);
+                        reka.erase(reka.begin() + wybor - 1);
+                    } else {
+                        cout << "\n[BLAD] Karta musi byc tego samego koloru i miec mniejsza wartosc!" << endl;
+                    }
+                } else {
+                    cout << "\n[BLAD] Niepoprawny numer rzedu!" << endl;
+                }
+            }
+        }
+
+        // --- FAZA 3: RUCH BOGEYMANA ---
+        zagraneKarty = 0;
+        for (size_t i = 0; i < rzedy.size(); i++) zagraneKarty += rzedy[i].pobierzLiczbeKart();
+        
+        // Bogeyman atakuje tylko, jesli gra nie jest juz wygrana
+        if (zagraneKarty < 52) { 
+            // Odnowienie talii jesli pusta
+            if (taliaGlowna.pobierzLiczbeKart() == 0 && taliaOdrzuconych.pobierzLiczbeKart() > 0) {
+                 while (taliaOdrzuconych.pobierzLiczbeKart() > 0) {
+                    taliaGlowna.polozNaWierzch(taliaOdrzuconych.dobierzZWierzchu());
+                }
+                taliaGlowna.tasuj();
+            }
+
+            if (taliaGlowna.pobierzLiczbeKart() > 0) {
+                Karta kBogey = taliaGlowna.dobierzZWierzchu();
+                cout << "\n!!! BOGEYMAN ATAKUJE !!!" << endl;
+                cout << "Przeciwnik narzuca Ci karte: [" << kBogey.nazwaKarty() << "]. Gdzie ja wcisniesz?" << endl;
+                
+                bool zagrana = false;
+                while (!zagrana) {
+                    cout << "Podaj numer rzedu (1-" << rzedy.size() << ") lub otworz nowy wpisujac " << rzedy.size() + 1 << ": ";
+                    int bRzad;
+                    if (!(cin >> bRzad)) { cin.clear(); cin.ignore(10000, '\n'); continue; }
+
+                    if (bRzad == (int)rzedy.size() + 1) {
+                        Talia nowyRzad;
+                        nowyRzad.polozNaWierzch(kBogey);
+                        rzedy.push_back(nowyRzad);
+                        zagrana = true;
+                    } else if (bRzad > 0 && bRzad <= (int)rzedy.size()) {
+                        int rIdx = bRzad - 1;
+                        Karta topKarta = rzedy[rIdx].pobierzKarte(rzedy[rIdx].pobierzLiczbeKart() - 1);
+                        if (kBogey.getKolor() == topKarta.getKolor() && kBogey.getWartosc() < topKarta.getWartosc()) {
+                            rzedy[rIdx].polozNaWierzch(kBogey);
+                            zagrana = true;
+                        } else {
+                            cout << "\n[BLAD] Niezgodny kolor lub wartosc nie jest mniejsza. Musisz ja gdzies upchnac!" << endl;
+                        }
+                    } else {
+                        cout << "\n[BLAD] Niepoprawny rzad!" << endl;
+                    }
+                }
+            }
+        }
+    }
+    
+    cout << "\nWcisnij Enter, aby zamknac gre...";
+    cin.ignore(10000, '\n');
+    cin.get();
+    return 0;
+}
